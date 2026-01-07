@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Interventi - Nursery Maintenance{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <div class="floating-badge mb-2">Interventi</div>
+    <h1 class="section-title mb-1">Pianificazione e stato</h1>
+    <div class="muted">Consulta gli interventi programmati, in corso o chiusi.</div>
+  </div>
+</div>
+
+<div class="card-modern p-3 mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+    <div>
+      <h5 class="mb-1">Crea intervento rapido</h5>
+      <div class="muted small">Scegli sede, titolo e (se vuoi) genera subito la checklist.</div>
+    </div>
+    <span class="badge-soft">Nuovo</span>
+  </div>
+  <form method="post" class="row g-3">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="create_task">
+    <div class="col-12 col-md-4">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Sede</label>
+      <select name="site_id" class="form-select" required>
+        <option value="">Seleziona sede</option>
+        {% for s in sites %}
+          <option value="{{ s.id }}">{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Titolo intervento</label>
+      <input class="form-control" type="text" name="title" placeholder="Es. Controllo mensile impianto" required>
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Data/ora</label>
+      <input class="form-control" type="datetime-local" name="scheduled_for" value="{{ now_local|date:'Y-m-d\\TH:i' }}">
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Stato</label>
+      <select name="status" class="form-select">
+        {% for value,label in status_choices %}
+          <option value="{{ value }}" {% if value == "scheduled" %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Template checklist</label>
+      <select name="template_id" class="form-select">
+        <option value="">Nessun template</option>
+        {% for t in checklist_templates %}
+          <option value="{{ t.id }}">{{ t.name }}{% if t.site %} ({{ t.site.name }}){% else %} (Generale){% endif %}</option>
+        {% endfor %}
+      </select>
+      <div class="form-text">Se scegli un template, le voci vengono create in automatico.</div>
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Asset (opzionale)</label>
+      <select name="asset_id" class="form-select">
+        <option value="">Nessuno</option>
+        {% for a in assets %}
+          <option value="{{ a.id }}">{{ a.site.name }} - {{ a.name }}</option>
+        {% endfor %}
+      </select>
+      <div class="form-text">Collega il template a un asset specifico.</div>
+    </div>
+    <div class="col-12">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Note</label>
+      <textarea class="form-control" name="notes" rows="2" placeholder="Note operative, materiali, contatti..."></textarea>
+    </div>
+    <div class="col-12 d-flex flex-wrap gap-2">
+      <button class="btn btn-primary fw-bold" type="submit">Crea intervento</button>
+      <a class="btn btn-outline-secondary" href="/admin/mainapp/maintenancetask/add/">Apri admin</a>
+      <a class="btn btn-outline-secondary" href="/admin/mainapp/checklisttemplate/">Template checklist</a>
+    </div>
+  </form>
+</div>
+
+<form method="get" class="card-modern p-3 mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-12 col-md-4">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Cerca</label>
+      <input class="form-control" type="text" name="q" placeholder="Titolo o note" value="{{ query }}">
+    </div>
+    <div class="col-12 col-md-3">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Stato</label>
+      <select name="status" class="form-select">
+        <option value="">Tutti</option>
+        {% for value,label in status_choices %}
+          <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-3">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Sede</label>
+      <select name="site" class="form-select">
+        <option value="">Tutte</option>
+        {% for s in sites %}
+          <option value="{{ s.id }}" {% if site_filter == s.id|stringformat:'s' %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-2 d-flex gap-2">
+      <button class="btn btn-primary flex-grow-1 fw-bold" type="submit">Filtra</button>
+      <a class="btn btn-outline-secondary" href="{% url 'task_list' %}">Reset</a>
+    </div>
+  </div>
+</form>
+
+{% if tasks %}
+  <div class="list-group list-modern">
+    {% for t in tasks %}
+      <a class="list-group-item list-group-item-action" href="{% url 'task_detail' t.id %}">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fw-bold">{{ t.title }}</div>
+            <div class="muted small">{{ t.site.name }}</div>
+            {% if t.notes %}<div class="small text-muted mt-1">{{ t.notes|truncatechars:120 }}</div>{% endif %}
+          </div>
+          <div class="text-end">
+            <span class="pill status-{{ t.status }}">{{ t.get_status_display }}</span>
+            <div class="small text-muted">{{ t.scheduled_for|date:"d/m/Y H:i" }}</div>
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty">Nessun intervento trovato.</div>
+{% endif %}
+{% endblock %}

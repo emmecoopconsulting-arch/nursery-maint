@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+
+{% block title %}Admin | Nursery Maintenance{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'admin-custom.css' %}">
+{% endblock %}
+
+{% block branding %}
+  <div class="nm-admin-brand">
+    <div>
+      <div class="nm-admin-logo">Nursery Maintenance</div>
+      <div class="nm-admin-sub">Console amministrativa</div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block nav-global %}
+  <div class="nm-admin-bar">
+    <div class="nm-admin-left">
+      <details class="nm-menu">
+        <summary>Menu</summary>
+        <div class="nm-menu-panel">
+          <a href="/">↩ Torna al dashboard</a>
+          <a href="{% url 'site_list' %}">Sedi</a>
+          <a href="{% url 'asset_list' %}">Asset</a>
+          <a href="{% url 'task_list' %}">Interventi</a>
+          <a href="{% url 'admin:index' %}">Indice admin</a>
+          <div class="nm-menu-divider"></div>
+          <a href="/admin/mainapp/site/add/">Nuova sede</a>
+          <a href="/admin/mainapp/asset/add/">Nuovo asset</a>
+          <a href="/admin/mainapp/maintenancetask/add/">Nuovo intervento</a>
+          <a href="/admin/mainapp/maintenanceplan/add/">Nuovo piano</a>
+          <a href="/admin/mainapp/checklisttemplate/add/">Nuova checklist</a>
+        </div>
+      </details>
+      <button class="nm-btn ghost" type="button" onclick="history.back()">← Indietro</button>
+    </div>
+    <div class="nm-admin-right">
+      <a class="nm-btn primary" href="/">Dashboard</a>
+      <a class="nm-btn" href="{% url 'admin:index' %}">Modelli</a>
+    </div>
+  </div>
+{% endblock %}

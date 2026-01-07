@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}{{ asset.name }} - Asset{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <div class="floating-badge mb-2">Scheda asset</div>
+    <h1 class="section-title mb-1">{{ asset.name }}</h1>
+    <div class="muted">{{ asset.site.name }}{% if asset.asset_type %} • {{ asset.asset_type }}{% endif %}</div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-7">
+    <div class="card-modern p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="mb-0">Dettagli</h5>
+          <div class="muted small">Identità e stato operativo</div>
+        </div>
+        <span class="pill status-{{ asset.status }}">{{ asset.get_status_display }}</span>
+      </div>
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="muted small text-uppercase fw-semibold mb-1">Seriale</div>
+          <div>{{ asset.serial|default:"-" }}</div>
+        </div>
+        <div class="col-6">
+          <div class="muted small text-uppercase fw-semibold mb-1">Fornitore</div>
+          <div>{{ asset.vendor|default:"-" }}</div>
+        </div>
+        <div class="col-6">
+          <div class="muted small text-uppercase fw-semibold mb-1">Data acquisto</div>
+          <div>{{ asset.purchase_date|date:"d/m/Y"|default:"-" }}</div>
+        </div>
+        <div class="col-6">
+          <div class="muted small text-uppercase fw-semibold mb-1">QR token</div>
+          <div class="text-break small">{{ asset.qr_token }}</div>
+        </div>
+      </div>
+      <div class="card-divider"></div>
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'asset_label_pdf' asset.id %}">Scarica etichetta PDF</a>
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'asset_qr_png' asset.id %}">Scarica QR PNG</a>
+      </div>
+    </div>
+
+    <div class="card-modern p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="mb-0">Interventi collegati</h5>
+          <div class="muted small">Interventi che toccano questo asset o la stessa sede</div>
+        </div>
+        <a class="cta-link" href="{% url 'task_list' %}">Tutti gli interventi →</a>
+      </div>
+      {% if tasks %}
+        <div class="list-group list-modern">
+          {% for t in tasks %}
+            <a class="list-group-item list-group-item-action" href="{% url 'task_detail' t.id %}">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold">{{ t.title }}</div>
+                  <div class="small text-muted">{{ t.site.name }}</div>
+                </div>
+                <div class="text-end">
+                  <span class="pill status-{{ t.status }}">{{ t.get_status_display }}</span>
+                  <div class="small text-muted">{{ t.scheduled_for|date:"d/m/Y H:i" }}</div>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">Nessun intervento associato ancora.</div>
+      {% endif %}
+    </div>
+
+    <div class="card-modern p-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="mb-0">Checklist recenti</h5>
+          <div class="muted small">Valori registrati su questo asset</div>
+        </div>
+      </div>
+      {% if checklist_items %}
+        <div class="list-group list-modern">
+          {% for i in checklist_items %}
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-bold">{{ i.label_snapshot }}</div>
+                  <div class="small text-muted">Intervento: <a href="{% url 'task_detail' i.task_id %}">{{ i.task.title }}</a></div>
+                </div>
+                <div class="text-end">
+                  <span class="pill status-{{ i.item_type }}">{{ i.item_type }}</span>
+                  <div class="small text-muted mt-1">
+                    {% if i.item_type == "yesno" %}
+                      {% if i.value_bool == True %}SI{% elif i.value_bool == False %}NO{% else %}-{% endif %}
+                    {% elif i.item_type == "number" %}
+                      {{ i.value_number|default_if_none:"-" }} {{ i.unit|default:"" }}
+                    {% else %}
+                      {{ i.value_text|default:"-" }}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">Non ci sono ancora checklist registrate per questo asset.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="qr-box mb-3 text-center">
+      <div class="mb-2 text-uppercase small">QR dell'asset</div>
+      <img class="img-fluid" style="max-width:260px" src="{% url 'asset_qr_png' asset.id %}" alt="QR">
+      <div class="mt-2 small text-white-50">{{ asset.qr_url }}</div>
+    </div>
+
+    <div class="card-modern p-3">
+      <h5 class="mb-2">Link rapido</h5>
+      <div class="muted small mb-2">URL nel QR</div>
+      <div class="text-break fw-semibold mb-3">{{ asset.qr_url }}</div>
+      <div class="card-divider"></div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a class="btn btn-outline-primary btn-sm" href="{{ asset.qr_url }}" target="_blank" rel="noopener noreferrer">Apri pagina QR</a>
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'asset_label_pdf' asset.id %}">Scarica etichetta</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
