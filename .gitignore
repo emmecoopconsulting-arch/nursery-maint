@@ -1,0 +1,41 @@
+# ======================
+# Environment / Secrets
+# ======================
+.env
+.env.*
+!.env.example
+
+# ======================
+# Python
+# ======================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ======================
+# Django
+# ======================
+db.sqlite3
+media/
+staticfiles/
+
+# ======================
+# Virtual environments
+# ======================
+venv/
+.venv/
+
+# ======================
+# Docker
+# ======================
+*.log
+docker-compose.override.yml
+
+# ======================
+# OS / Editor
+# ======================
+.DS_Store
+.idea/
+.vscode/
+*.swp
