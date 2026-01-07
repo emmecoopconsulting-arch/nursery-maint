@@ -1,0 +1,176 @@
+:root {
+  --nm-ink: #0f172a;
+  --nm-muted: #61708a;
+  --nm-accent: #0ea5e9;
+  --nm-bg: #f7f9fb;
+  --nm-border: #d8dee9;
+}
+
+body {
+  font-family: "Manrope", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--nm-bg);
+}
+
+#header {
+  background: linear-gradient(120deg, #0ea5e9, #06b6d4);
+  border-bottom: none;
+}
+
+#header h1, #header h1 a:link, #header h1 a:visited {
+  color: #fff;
+  font-weight: 800;
+}
+
+.nm-admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nm-admin-logo {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #fff;
+}
+
+.nm-admin-sub {
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.breadcrumbs {
+  background: #fff;
+  border-bottom: 1px solid var(--nm-border);
+  color: var(--nm-muted);
+}
+
+.breadcrumbs a {
+  color: var(--nm-ink);
+  font-weight: 700;
+}
+
+.nm-admin-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #fff;
+  border-bottom: 1px solid var(--nm-border);
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
+
+.nm-admin-left, .nm-admin-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nm-btn {
+  border: 1px solid var(--nm-border);
+  background: #fff;
+  color: var(--nm-ink);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nm-btn.primary {
+  background: var(--nm-accent);
+  color: #fff;
+  border: none;
+}
+
+.nm-btn.ghost {
+  background: transparent;
+}
+
+.nm-menu {
+  position: relative;
+}
+
+.nm-menu summary {
+  list-style: none;
+  cursor: pointer;
+  border: 1px solid var(--nm-border);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.nm-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.nm-menu-panel {
+  position: absolute;
+  margin-top: 8px;
+  left: 0;
+  min-width: 220px;
+  background: #fff;
+  border: 1px solid var(--nm-border);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  z-index: 1200;
+}
+
+.nm-menu[open] summary {
+  border-color: var(--nm-accent);
+}
+
+.nm-menu-panel a {
+  text-decoration: none;
+  color: var(--nm-ink);
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: 8px;
+}
+
+.nm-menu-panel a:hover {
+  background: #f1f5f9;
+}
+
+.nm-menu-divider {
+  height: 1px;
+  background: var(--nm-border);
+  margin: 6px 0;
+}
+
+.module caption, .module h2 {
+  font-weight: 800;
+  color: var(--nm-ink);
+}
+
+.module {
+  border-radius: 12px;
+  border: 1px solid var(--nm-border);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+input, select, textarea {
+  border-radius: 10px;
+  border-color: var(--nm-border);
+}
+
+.object-tools a {
+  background: var(--nm-accent);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.submit-row input {
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Asset - Nursery Maintenance{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <div class="floating-badge mb-2">Catalogo asset</div>
+    <h1 class="section-title mb-1">Asset</h1>
+    <div class="muted">Visualizza, filtra e apri la scheda di ogni asset.</div>
+  </div>
+</div>
+
+<form method="get" class="card-modern p-3 mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-12 col-md-6">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Cerca</label>
+      <input type="text" name="q" class="form-control" placeholder="Nome, tipo, seriale o sede" value="{{ query }}">
+    </div>
+    <div class="col-12 col-md-3">
+      <label class="form-label fw-semibold text-uppercase small mb-1">Stato</label>
+      <select name="status" class="form-select">
+        <option value="">Tutti</option>
+        {% for value,label in status_choices %}
+          <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-3 d-flex gap-2">
+      <button class="btn btn-primary flex-grow-1 fw-bold" type="submit">Filtra</button>
+      <a class="btn btn-outline-secondary" href="{% url 'asset_list' %}">Reset</a>
+    </div>
+  </div>
+</form>
+
+{% if assets %}
+  <div class="tile-grid">
+    {% for asset in assets %}
+      <div class="card-modern p-3">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <div class="fw-bold">{{ asset.name }}</div>
+            <div class="muted small">{{ asset.site.name }}</div>
+          </div>
+          <span class="pill status-{{ asset.status }}">{{ asset.get_status_display }}</span>
+        </div>
+        {% if asset.asset_type %}<div class="small text-muted mb-1">{{ asset.asset_type }}</div>{% endif %}
+        {% if asset.serial %}<div class="small text-muted mb-1">Seriale: {{ asset.serial }}</div>{% endif %}
+        {% if asset.vendor %}<div class="small text-muted mb-1">Fornitore: {{ asset.vendor }}</div>{% endif %}
+
+        <div class="card-divider"></div>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'asset_by_token' token=asset.qr_token %}">Apri scheda</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'asset_label_pdf' asset.id %}">Etichetta PDF</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'asset_qr_png' asset.id %}">QR PNG</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty">Nessun asset trovato con i filtri correnti.</div>
+{% endif %}
+{% endblock %}

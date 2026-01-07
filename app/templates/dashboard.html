@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Nursery Maintenance{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <div class="floating-badge mb-2">
+      <span>Controllo in tempo reale</span>
+    </div>
+    <h1 class="section-title mb-1">Dashboard operativa</h1>
+    <div class="muted">Asset, sedi e interventi in un colpo d'occhio.</div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-3">
+    <div class="stat-card h-100">
+      <div class="label">Interventi aperti</div>
+      <div class="value">{{ open_tasks }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-3">
+    <div class="stat-card h-100">
+      <div class="label">Asset totali</div>
+      <div class="value">{{ total_assets }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-3">
+    <div class="stat-card h-100">
+      <div class="label">Sedi attive</div>
+      <div class="value">{{ total_sites }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-md-3">
+    <div class="stat-card h-100">
+      <div class="label">Interventi chiusi</div>
+      <div class="value">{{ task_stats.done|default:0 }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-lg-7">
+    <div class="card-modern p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="mb-0">Interventi in agenda</h5>
+          <div class="muted small">Programmato o in corso</div>
+        </div>
+        <a class="cta-link" href="{% url 'task_list' %}">Vai alla lista →</a>
+      </div>
+      {% if upcoming_tasks %}
+        <div class="list-group list-modern">
+          {% for t in upcoming_tasks %}
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div>
+                  <div class="fw-bold">{{ t.title }}</div>
+                  <div class="muted small">{{ t.site.name }}</div>
+                </div>
+                <div class="text-end">
+                  <span class="pill status-{{ t.status }}">{{ t.get_status_display }}</span>
+                  <div class="small text-muted">{{ t.scheduled_for|date:"d/m H:i" }}</div>
+                </div>
+              </div>
+              <div class="d-flex flex-wrap gap-2 mt-2">
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'task_detail' t.id %}">Dettaglio</a>
+                <form method="post">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="start_task">
+                  <input type="hidden" name="task_id" value="{{ t.id }}">
+                  <button class="btn btn-sm btn-primary fw-bold" type="submit">Avvia intervento</button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">Nessun intervento aperto. <a href="{% url 'task_list' %}">Crea un intervento</a>.</div>
+      {% endif %}
+    </div>
+
+    <div class="card-modern p-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="mb-0">Chiusure recenti</h5>
+          <div class="muted small">Ultimi interventi completati</div>
+        </div>
+      </div>
+      {% if recent_done_tasks %}
+        <div class="tile-grid">
+          {% for t in recent_done_tasks %}
+            <div class="card-minimal p-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-bold">{{ t.title }}</div>
+                <span class="pill status-{{ t.status }}">{{ t.get_status_display }}</span>
+              </div>
+              <div class="muted small mb-2">{{ t.site.name }}</div>
+              <div class="small text-muted mb-2">Chiuso il {{ t.scheduled_for|date:"d/m/Y" }}</div>
+              <a class="cta-link small" href="{% url 'task_detail' t.id %}">Vedi dettaglio →</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">Ancora nessuna chiusura registrata.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="card-modern p-3 mb-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="mb-0">Sedi</h5>
+          <div class="muted small">Panoramica rapida</div>
+        </div>
+        <a class="cta-link" href="{% url 'site_list' %}">Gestisci sedi →</a>
+      </div>
+      {% if sites %}
+        <div class="list-group list-modern">
+          {% for s in sites %}
+            <a class="list-group-item list-group-item-action" href="{% url 'site_detail' s.id %}">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="fw-bold">{{ s.name }}</div>
+                  {% if s.address %}<div class="small text-muted">{{ s.address }}</div>{% endif %}
+                </div>
+                <div class="text-end">
+                  <span class="badge-soft">Asset: {{ s.asset_count|default:0 }}</span><br>
+                  <span class="badge-soft">Interventi: {{ s.open_tasks|default:0 }}</span>
+                </div>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">Non ci sono sedi registrate.</div>
+      {% endif %}
+    </div>
+
+    <div class="card-modern p-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <h5 class="mb-0">Asset recenti</h5>
+          <div class="muted small">Ultimi inserimenti</div>
+        </div>
+        <a class="cta-link" href="{% url 'asset_list' %}">Vai agli asset →</a>
+      </div>
+      {% if recent_assets %}
+        <div class="tile-grid tight">
+          {% for a in recent_assets %}
+            <div class="card-minimal p-3">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div class="fw-bold">{{ a.name }}</div>
+                <span class="pill status-{{ a.status }}">{{ a.get_status_display }}</span>
+              </div>
+              <div class="muted small mb-1">{{ a.site.name }}</div>
+              {% if a.asset_type %}<div class="small text-muted mb-2">{{ a.asset_type }}</div>{% endif %}
+              <a class="cta-link small" href="{% url 'asset_by_token' token=a.qr_token %}">Apri scheda →</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty">Nessun asset presente.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
